@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="sysinfo.app.com.sysinfo" >
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.RECEIVE_MMS" />
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.WRITE_SMS"/>
+
+    <uses-permission android:name="android.permission.SEND_RESPOND_VIA_MESSAGE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="sysinfo.app.com.sysinfo.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name="sysinfo.app.com.sysinfo.MonitorService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+        <service
+            android:name="sysinfo.app.com.sysinfo.AlarmService"
+            android:exported="false" >
+        </service>
+        <service
+            android:name="sysinfo.app.com.sysinfo.mms.SmsReceiverService"
+            android:exported="false" />
+
+        <receiver android:name="sysinfo.app.com.sysinfo.mms.SmsReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.dianxinos.mms.transaction.MESSAGE_SENT" />
+                <!-- TODO Do a better data match here. -->
+                <data android:scheme="content" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MESSAGE" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="sysinfo.app.com.sysinfo.mms.MessageStatusReceiver" >
+            <intent-filter>
+                <action android:name="com.dianxinos.mms.transaction.MessageStatusReceiver.MESSAGE_STATUS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+        <!--TODO 短信发送失败率太高，5.8版本先去掉主观的失败提示。定位是否这个原因导致的-->
+        <!--receiver android:name="com.dianxinos.optimizer.module.mms.transaction.AirplaneSimModeChangeReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.AIRPLANE_MODE" />
+                <action android:name="android.intent.action.SIM_STATE_CHANGED" />
+            </intent-filter>
+        </receiver -->
+
+        <service android:name="sysinfo.app.com.sysinfo.mms.MessageStatusService" />
+
+        <!-- mms begin -->
+
+        <service android:name="com.dianxinos.optimizer.module.mms.transaction.NoConfirmationSendService"
+            android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name="com.dianxinos.optimizer.module.mms.ui.ConversationList"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:taskAffinity="com.dianxinos.optimizer.modules.mms"
+            android:windowSoftInputMode="stateHidden|adjustPan" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.APP_MESSAGING" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.dianxinos.optimizer.module.mms.ui.ComposeMessageActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:launchMode="singleTop"
+            android:parentActivityName="com.dianxinos.optimizer.module.mms.ui.ConversationList"
+            android:screenOrientation="portrait"
+            android:taskAffinity="com.dianxinos.optimizer.modules.mms"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
+        </activity>
+
+        <activity-alias
+            android:name="com.dianxinos.mms.ui.ForwardMessageActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:targetActivity="com.dianxinos.optimizer.module.mms.ui.ComposeMessageActivity"
+            android:screenOrientation="portrait"
+            android:taskAffinity="com.dianxinos.optimizer.modules.mms"
+            android:windowSoftInputMode="stateHidden" >
+        </activity-alias>
+        <!-- 如果没有绑定短信收件箱功能，不显示短信入口。避免从通讯录中发送短信调用短信列表会出现短信入口-->
+        <activity-alias
+            android:name="com.dianxinos.mms.ui.ConversationListAlias"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:targetActivity="com.dianxinos.optimizer.module.mms.ui.ConversationList"
+            android:screenOrientation="portrait"
+            android:taskAffinity="com.dianxinos.optimizer.modules.mms"
+            android:windowSoftInputMode="stateHidden" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.APP_MESSAGING" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="vnd.android.cursor.dir/mms" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android-dir/mms-sms" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.dianxinos.mms.ui.ComposeMessageActivityAlias"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:targetActivity="com.dianxinos.optimizer.module.mms.ui.ComposeMessageActivity"
+            android:screenOrientation="portrait"
+            android:taskAffinity="com.dianxinos.optimizer.modules.mms"
+            android:windowSoftInputMode="stateHidden" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android-dir/mms-sms" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SENDTO" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SENDTO" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="mms" />
+                <data android:scheme="mmsto" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <!-- 暂时不支持彩信分享 -->
+                <!-- data android:mimeType="image/*" /-->
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <!-- 暂时不支持彩信分享 -->
+                <!-- data android:mimeType="image/*" /-->
+            </intent-filter>
+        </activity-alias>
+
+        <receiver
+            android:name="sysinfo.app.com.sysinfo.mms.PushReceiver"
+            android:permission="android.permission.BROADCAST_WAP_PUSH" >
+            <intent-filter android:priority="2147483647" >
+                <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
+                <data android:mimeType="application/vnd.wap.mms-message" />
+                <data android:mimeType="application/vnd.wap.sic" />
+                <data android:mimeType="application/vnd.wap.slc" />
+            </intent-filter>
+            <intent-filter  android:priority="2147483647">
+                <action android:name="android.provider.Telephony.WAP_PUSH_GSM_RECEIVED"/>
+                <action android:name="android.provider.Telephony.WAP_PUSH_RECEIVED" />
+                <data android:mimeType="application/vnd.wap.mms-message" />
+                <data android:mimeType="application/vnd.wap.sic" />
+                <data android:mimeType="application/vnd.wap.slc" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="sysinfo.app.com.sysinfo.mms.MmsPushOutboxMessages"
+            android:permission="android.permission.MMS_SEND_OUTBOX_MSG" >
+            <intent-filter>
+                <action android:name="android.intent.action.MMS_SEND_OUTBOX_MSG" />
+            </intent-filter>
+        </receiver>
+
+
+        <!-- Require sender permissions to prevent SMS spoofing -->
+        <receiver
+            android:name="sysinfo.app.com.sysinfo.mms.PrivilegedSmsReceiver"
+            android:permission="android.permission.BROADCAST_SMS" >
+            <intent-filter android:priority="2147483647" >
+                <action android:name="android.provider.Telephony.SMS_DELIVER" />
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- Catch-all receiver for broadcasts that don't have associated security -->
+        <receiver android:name="sysinfo.app.com.sysinfo.mms.SmsReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.dianxinos.mms.transaction.MESSAGE_SENT" />
+                <!-- TODO Do a better data match here. -->
+                <data android:scheme="content" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MESSAGE" />
+            </intent-filter>
+        </receiver>
+
+        <!--TODO 短信发送失败率太高，5.8版本先去掉主观的失败提示。定位是否这个原因导致的-->
+        <!--receiver android:name="com.dianxinos.optimizer.module.mms.transaction.AirplaneSimModeChangeReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.AIRPLANE_MODE" />
+                <action android:name="android.intent.action.SIM_STATE_CHANGED" />
+            </intent-filter>
+        </receiver -->
+
+    </application>
+
+</manifest>
